@@ -1,16 +1,27 @@
 <?php
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
+// default page
 Route::get('/', function () {
     return view('welcome');
+});
+
+// http://oscreport.test/report1
+Route::get('/report1', 'ServiceController@report1');
+
+
+
+// http://oscreport.test/hello
+Route::get('/hello', function() {
+    echo "Hello World";
+    // query guna model (Eloquent)
+    // return data dlm array of obj
+    // get(), paginate(10), all(), first(), find(1) - by pk
+    $services = \App\Models\Service::where('serviceid_int', '>=', 10)
+    ->where('serviceid_int', '<=', 20)
+    //->whereOr()
+    ->orderBy('serviceid_int', 'desc')
+    ->get();
+    // [{}, {}, {}]
+    foreach ($services as $s) {
+        echo $s->servicename_tx . '<hr>';
+    }
 });
