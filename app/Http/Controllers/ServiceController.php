@@ -22,7 +22,6 @@ class ServiceController extends Controller {
             // user submit form carian
             $tajuk = $req->tajuk;
             $rs = DB::table('egov_service')
-            //->join('egov_servicestage', 'egov_servicestage.serviceid_int', '=', 'egov_service.serviceid_int')
             ->select(DB::raw("CONCAT(projectid_int, '-', serviceno_tx) AS id_permohonan, servicename_tx"))
             ->where('servicename_tx', 'LIKE', "%$tajuk%")
             ->whereRaw("EXISTS(SELECT 1 FROM egov_servicestage
@@ -38,6 +37,7 @@ class ServiceController extends Controller {
     }
 
     function report2Details($id) {
+        // ATD
         $rs = DB::table('egov_service')
         ->select(DB::raw("departmentname_tx, DATEDIFF(completiondate_ts, crateddate_ts) AS hari,
         crateddate_ts, completiondate_ts, servicestage_tx"))
@@ -47,6 +47,15 @@ class ServiceController extends Controller {
         ->whereRaw("CONCAT(projectid_int, '-', serviceno_tx) = '$id'")
         ->get();
 
-        return view('service.report2_details', ['rs' => $rs]);
+        // ATL
+        $rs2 = DB::table('egov_service')
+        ->select(DB::raw("agencyname_tx, DATEDIFF(completiondate_ts, crateddate_ts) AS hari,
+        crateddate_ts, completiondate_ts"))
+        ->join('egov_servicestage', 'egov_service.serviceid_int', '=', 'egov_servicestage.serviceid_int')
+        ->join('egov_externalagency', 'egov_servicestage.externalagency_tx', '=', 'egov_externalagency.agencyid_int')
+        ->whereRaw("CONCAT(projectid_int, '-', serviceno_tx) = '$id'")
+        ->get();
+
+        return view('service.report2_details', ['rs' => $rs, 'rs2' => $rs2]);
     }
 }
