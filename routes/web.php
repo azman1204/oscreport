@@ -7,6 +7,17 @@ Route::get('/', function () {
 // http://oscreport.test/report1
 Route::get('/report1', 'ServiceController@report1');
 
+// http://oscreport.test/report2
+// click dari menu ke form carian
+Route::get('/report2', 'ServiceController@report2');
+
+// submit form carian
+Route::post('/report2', 'ServiceController@report2');
+
+// klik pd 'lihat'
+Route::get('/report2-details/{id}', 'ServiceController@report2Details');
+
+
 
 
 // http://oscreport.test/hello
