@@ -22,10 +22,14 @@ class ServiceController extends Controller {
             // user submit form carian
             $tajuk = $req->tajuk;
             $rs = DB::table('egov_service')
+            //->join('egov_servicestage', 'egov_servicestage.serviceid_int', '=', 'egov_service.serviceid_int')
             ->select(DB::raw("CONCAT(projectid_int, '-', serviceno_tx) AS id_permohonan, servicename_tx"))
             ->where('servicename_tx', 'LIKE', "%$tajuk%")
+            ->whereRaw("EXISTS(SELECT 1 FROM egov_servicestage
+            WHERE egov_service.serviceid_int = egov_servicestage.serviceid_int
+            AND egov_servicestage.servicestage_tx IN ('3', '3b'))")
             // ->orWhere(DB::raw("CONCAT(projectid_int, '-', serviceno_tx)"), 'LIKE', '%$tajuk%')
-            ->orWhereRaw("CONCAT(projectid_int, '-', serviceno_tx) LIKE '%$tajuk%'")
+            //->orWhereRaw("CONCAT(projectid_int, '-', serviceno_tx) LIKE '%$tajuk%'")
             ->paginate(20);
         } else {
             $rs = [];
@@ -36,10 +40,11 @@ class ServiceController extends Controller {
     function report2Details($id) {
         $rs = DB::table('egov_service')
         ->select(DB::raw("departmentname_tx, DATEDIFF(completiondate_ts, crateddate_ts) AS hari,
-        b.crateddate_ts, b.completiondate_ts, b.servicestage_tx"))
+        crateddate_ts, completiondate_ts, servicestage_tx"))
         ->join('egov_servicestage', 'egov_service.serviceid_int', '=', 'egov_servicestage.serviceid_int')
         ->join('department', 'department.departmentid_int', '=', 'egov_servicestage.processedby_int')
         ->whereIn('servicestage_tx', ['3', '3b'])
+        ->whereRaw("CONCAT(projectid_int, '-', serviceno_tx) = '$id'")
         ->get();
 
         return view('service.report2_details', ['rs' => $rs]);
